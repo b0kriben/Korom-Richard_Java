@@ -1,0 +1,269 @@
+package webotlet_19maj_ceges_autok;
+ 
+public class AutoAdat
+{
+ 
+  private int nap;
+  private String ido;
+  private String rendszam;
+  private int dolgozo;
+  private int km;
+  private boolean be;
+  private int sorszam;
+ 
+  public AutoAdat(String[] tomb)
+  {
+    nap = Integer.parseInt(tomb[0]);
+    ido = tomb[1];
+    rendszam = tomb[2];
+    dolgozo = Integer.parseInt(tomb[3]);
+    km = Integer.parseInt(tomb[4]);
+    be = tomb[5].equals("1");
+    sorszam = Character.getNumericValue(rendszam.charAt(5));
+  }
+ 
+  public int getNap()
+  {
+    return nap;
+  }
+ 
+  public String getIdo()
+  {
+    return ido;
+  }
+ 
+  public String getRendszam()
+  {
+    return rendszam;
+  }
+ 
+  public int getDolgozo()
+  {
+    return dolgozo;
+  }
+ 
+  public int getKm()
+  {
+    return km;
+  }
+ 
+  public boolean isBe()
+  {
+    return be;
+  }
+ 
+  public int getSorszam()
+  {
+    return sorszam;
+  }
+ 
+  @Override
+  public String toString()
+  {
+    return "AutoAdat{" + "nap=" + nap + ", ido=" + ido 
+      + ", rendszam=" + rendszam + ", dolgozo=" + dolgozo 
+      + ", km=" + km + ", be=" + be + ", sorszam=" + sorszam + '}';
+  }
+}
+
+
+
+A feladat megoldásai:
+
+
+package webotlet_19maj_ceges_autok;
+ 
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.util.Scanner;
+ 
+public class Webotlet_19maj_ceges_autok
+{
+ 
+  public static void main(String[] args)
+  {
+    // 1. feladat
+    RandomAccessFile raf;
+    String sor;
+    AutoAdat[] adatok = null;
+ 
+    try
+    {
+      raf = new RandomAccessFile("autok.txt", "r");
+      int db = 0;
+      for( sor = raf.readLine(); sor != null; sor = raf.readLine() )
+      {
+        db++;
+      }
+ 
+      adatok = new AutoAdat[db];
+ 
+      raf.seek(0);
+      int hely = 0;
+      for( sor = raf.readLine(); sor != null; sor = raf.readLine() )
+      {
+        adatok[hely] = new AutoAdat(sor.split(" "));
+        hely++;
+      }
+      raf.close();
+    }
+    catch( IOException e )
+    {
+      System.out.println("HIBA");
+    }
+ 
+//        for( AutoAdat adat : adatok )
+//        {
+//            System.out.println(adat);
+//        }
+// 2. feladat
+    System.out.println("2. feladat");
+    for( int i = adatok.length - 1; i > -1; i-- )
+    {
+      if( !adatok[i].isBe() )
+      {
+        System.out.println(adatok[i].getNap() + ". nap rendszam: "
+          + adatok[i].getRendszam());
+        break;
+      }
+    }
+ 
+// 3. feladat
+    System.out.println("3. feladat");
+    Scanner sc = new Scanner(System.in);
+    System.out.print("Nap: ");
+    int nap = sc.nextInt();
+    System.out.println("Forgalom a(z) " + nap + ". napon:");
+    for( int i = 0; i < adatok.length; i++ )
+    {
+      if( adatok[i].getNap() == nap )
+      {
+        System.out.print(adatok[i].getIdo() + " "
+          + adatok[i].getRendszam() + " "
+          + adatok[i].getDolgozo() + " ");
+        if( adatok[i].isBe() )
+        {
+          System.out.println("be");
+        }
+        else
+        {
+          System.out.println("ki");
+        }
+      }
+    }
+ 
+// 4. feladat
+    System.out.println("4. feladat");
+    int[] napok = new int[10];
+ 
+    for( int i = 0; i < adatok.length; i++ )
+    {
+      if( adatok[i].isBe() )
+      {
+        napok[adatok[i].getSorszam()]--;
+      }
+      else
+      {
+        napok[adatok[i].getSorszam()]++;
+      }
+    }
+ 
+    int osszeg = 0;
+    for( int i = 0; i < napok.length; i++ )
+    {
+      osszeg += napok[i];
+    }
+    System.out.println("A honap vegen " + osszeg + " autot nem hoztak vissza.");
+ 
+// 5. feladat
+    System.out.println("5. feladat");
+ 
+    for( int i = 0; i < adatok.length - 1; i++ )
+    {
+      for( int j = i + 1; j < adatok.length; j++ ) { // 3 szempont szerint rendezek // rendszam szerint // azon belul nap szerint // azon belul ido szerint if( adatok[i].getRendszam().compareTo(adatok[j].getRendszam()) > 0
+          || (adatok[i].getRendszam().compareTo(adatok[j].getRendszam()) == 0
+          && adatok[i].getNap() > adatok[j].getNap())
+          || (adatok[i].getRendszam().compareTo(adatok[j].getRendszam()) == 0
+          && adatok[i].getNap() == adatok[j].getNap()
+          && adatok[i].getIdo().compareTo(adatok[j].getIdo()) > 0) )
+        {
+          AutoAdat csere = adatok[i];
+          adatok[i] = adatok[j];
+          adatok[j] = csere;
+        }
+      }
+    }
+ 
+    int[] kmosszeg = new int[10];
+ 
+    for( int i = 1; i < adatok.length; i++ )
+    {
+      if( adatok[i].getSorszam() == adatok[i - 1].getSorszam() )
+      {
+        kmosszeg[adatok[i].getSorszam()] += adatok[i].getKm() - adatok[i - 1].getKm();
+      }
+    }
+ 
+    for( int i = 0; i < kmosszeg.length; i++ )
+    {
+      System.out.println("CEG30" + i + " " + kmosszeg[i] + " km");
+    }
+ 
+// 6. feladat
+    System.out.println("6. feladat");
+ 
+    int maxhely = 0;
+    int max = 0;
+ 
+    for( int i = 1; i < adatok.length; i++ ) { if( adatok[i].getSorszam() == adatok[i - 1].getSorszam() ) { if( adatok[i].getKm() - adatok[i - 1].getKm() > max )
+        {
+          max = adatok[i].getKm() - adatok[i - 1].getKm();
+          maxhely = i;
+        }
+      }
+    }
+ 
+    System.out.println("Leghosszabb ut: " + max + " km, szemely: "
+      + adatok[maxhely].getDolgozo());
+ 
+// 7. feladat
+    System.out.println("7. feladat");
+ 
+    sc = new Scanner(System.in);
+    System.out.print("Rendszam: ");
+    String rendszam = sc.nextLine();
+ 
+    RandomAccessFile ki;
+    try
+    {
+      ki = new RandomAccessFile(rendszam + "_menetlevel.txt", "rw");
+      ki.setLength(0);
+      for( int i = 0; i < adatok.length; i++ )
+      {
+        if( adatok[i].getRendszam().equals(rendszam) )
+        {
+          if( !adatok[i].isBe() )
+          {
+            ki.writeBytes(adatok[i].getDolgozo() + "\t"
+              + adatok[i].getNap() + ". " + adatok[i].getIdo()
+              + "\t" + adatok[i].getKm() + " km");
+          }
+          else
+          {
+            ki.writeBytes("\t" + adatok[i].getNap()
+              + ". " + adatok[i].getIdo() + "\t" + adatok[i].getKm()
+              + " km\n");
+ 
+          }
+        }
+      }
+      System.out.println("Menetlevel kesz.");
+      ki.close();
+    }
+    catch( IOException e )
+    {
+      System.out.println("HIBA");
+    }
+  }
+ 
+}
